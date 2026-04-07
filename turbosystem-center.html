@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="hu" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TurboSystem Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0a0a12;
+  --surface: #12121e;
+  --surface2: #1a1a2e;
+  --surface3: #22223a;
+  --border: rgba(120,100,220,0.25);
+  --accent: #7c4dff;
+  --accent2: #00e5ff;
+  --accent3: #69ff47;
+  --text: #e8e8f0;
+  --muted: #8888aa;
+  --faint: #44445a;
+  --danger: #ff4d6a;
+  --warn: #ffb347;
+  --win7-grad: linear-gradient(180deg, #1c2a4a 0%, #0f1828 100%);
+  --glass: rgba(255,255,255,0.04);
+  --font: 'Segoe UI', 'Arial', sans-serif;
+  --mono: 'Share Tech Mono', monospace;
+}
+html { font-size: 14px; }
+body {
+  font-family: var(--font);
+  background: #050510;
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* === BACKGROUND === */
+.bg-stars {
+  position: fixed; inset: 0; z-index: 0;
+  background: radial-gradient(ellipse at 20% 20%, rgba(124,77,255,0.08) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 80%, rgba(0,229,255,0.06) 0%, transparent 60%);
+}
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0;
+  background-image: linear-gradient(rgba(124,77,255,0.04) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(124,77,255,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* === LOGIN SCREEN === */
+#login-screen {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(5,5,16,0.98);
+  backdrop-filter: blur(20px);
+}
+.login-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 40px 48px;
+  text-align: center;
+  width: 360px;
+  box-shadow: 0 0 60px rgba(124,77,255,0.2), 0 0 120px rgba(0,229,255,0.1);
+  position: relative; z-index: 1;
+}
+.login-logo {
+  margin-bottom: 8px;
+}
+.login-logo svg { width: 64px; height: 64px; }
+.login-title { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 4px; letter-spacing: 1px; }
+.login-sub { color: var(--muted); font-size: 12px; margin-bottom: 28px; }
+.login-label { font-size: 12px; color: var(--muted); text-align: left; margin-bottom: 6px; }
+.login-input {
+  width: 100%; padding: 10px 14px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 6px; color: #fff; font-size: 20px;
+  letter-spacing: 8px; text-align: center; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.login-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,77,255,0.2); }
+.login-btn {
+  margin-top: 16px; width: 100%; padding: 11px;
+  background: linear-gradient(135deg, var(--accent), #5c2dde);
+  border: none; border-radius: 6px; color: #fff; font-size: 14px;
+  font-weight: 600; cursor: pointer; transition: opacity 0.2s, transform 0.1s;
+}
+.login-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.login-btn:active { transform: translateY(0); }
+.login-hint { font-size: 11px; color: var(--faint); margin-top: 12px; }
+.login-err {
+  font-size: 12px; color: var(--danger); margin-top: 8px; opacity: 0;
+  transition: opacity 0.3s; min-height: 18px;
+}
+
+/* === MAIN WINDOW === */
+#app {
+  position: relative; z-index: 1;
+  width: 900px; max-width: 98vw;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 0 80px rgba(124,77,255,0.15), 0 30px 60px rgba(0,0,0,0.7);
+  overflow: hidden;
+  display: none;
+  flex-direction: column;
+  max-height: 96vh;
+}
+
+/* === TITLEBAR === */
+.titlebar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 12px 0 16px; height: 36px;
+  background: linear-gradient(180deg, #1e1640 0%, #100e28 100%);
+  border-bottom: 1px solid rgba(124,77,255,0.3);
+  flex-shrink: 0;
+}
+.titlebar-left { display: flex; align-items: center; gap: 8px; }
+.titlebar-icon { width: 18px; height: 18px; }
+.titlebar-title { font-size: 12px; font-weight: 600; color: #ccc; }
+.titlebar-controls { display: flex; gap: 6px; }
+.titlebar-btn {
+  width: 22px; height: 22px; border-radius: 50%; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 10px;
+}
+.tb-min { background: #ffb347; color: #7a4500; }
+.tb-max { background: #69ff47; color: #1a5c00; }
+.tb-close { background: #ff4d6a; color: #7a0020; }
+
+/* === HEADER === */
+.app-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px 12px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.app-brand { display: flex; align-items: center; gap: 12px; }
+.brand-logo svg { width: 36px; height: 36px; }
+.brand-name { font-size: 18px; font-weight: 700; color: #fff; }
+.brand-ver { font-size: 11px; color: var(--accent2); font-family: var(--mono); }
+.header-status {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--accent3);
+}
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--accent3);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot { 0%,100%{opacity:1}50%{opacity:0.4} }
+
+/* === TABS === */
+.tabs {
+  display: flex; gap: 2px; padding: 0 20px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+.tab {
+  padding: 10px 16px; font-size: 12px; font-weight: 600;
+  color: var(--muted); border: none; background: none;
+  cursor: pointer; border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+
+/* === CONTENT === */
+.content {
+  padding: 20px; overflow-y: auto; flex: 1;
+  scrollbar-width: thin; scrollbar-color: var(--faint) transparent;
+}
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* === CARDS === */
+.card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 16px;
+  margin-bottom: 12px;
+}
+.card-title {
+  font-size: 12px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--muted); margin-bottom: 12px;
+  display: flex; align-items: center; gap: 6px;
+}
+.card-title .dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+}
+
+/* === GRID === */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+/* === GAUGE === */
+.gauge-wrap { text-align: center; }
+.gauge { position: relative; width: 90px; height: 90px; margin: 0 auto 8px; }
+.gauge svg { width: 90px; height: 90px; transform: rotate(-90deg); }
+.gauge-track { fill: none; stroke: var(--surface3); stroke-width: 8; }
+.gauge-fill { fill: none; stroke-width: 8; stroke-linecap: round;
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1); }
+.gauge-cpu .gauge-fill { stroke: var(--accent); }
+.gauge-ram .gauge-fill { stroke: var(--accent2); }
+.gauge-temp .gauge-fill { stroke: var(--warn); }
+.gauge-label {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.gauge-value { font-size: 18px; font-weight: 700; line-height: 1; }
+.gauge-unit { font-size: 9px; color: var(--muted); text-transform: uppercase; }
+.gauge-name { font-size: 11px; color: var(--muted); font-weight: 600; }
+
+/* === TOGGLE === */
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.toggle-row:last-child { border-bottom: none; }
+.toggle-info { flex: 1; margin-right: 16px; }
+.toggle-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.toggle-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.toggle-switch {
+  position: relative; width: 40px; height: 22px; flex-shrink: 0;
+}
+.toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle-track {
+  position: absolute; inset: 0;
+  background: var(--surface3); border-radius: 11px; cursor: pointer;
+  transition: background 0.2s;
+}
+.toggle-track::after {
+  content: ''; position: absolute; top: 3px; left: 3px;
+  width: 16px; height: 16px; border-radius: 50%; background: #fff;
+  transition: left 0.2s, background 0.2s;
+}
+input:checked ~ .toggle-track { background: var(--accent); }
+input:checked ~ .toggle-track::after { left: 21px; }
+
+/* Performance tab — hover reveal */
+.perf-secret .toggle-row { opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+.perf-secret:hover .toggle-row { opacity: 1; pointer-events: auto; }
+.perf-secret-hint {
+  font-size: 11px; color: var(--muted); text-align: center; padding: 8px;
+  font-style: italic;
+}
+
+/* === BUTTONS === */
+.btn {
+  padding: 8px 18px; border-radius: 6px; border: none;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), #5c2dde);
+  color: #fff;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(124,77,255,0.4); }
+.btn-primary:active { transform: translateY(0); }
+.btn-danger {
+  background: linear-gradient(135deg, #ff4d6a, #c0002a);
+  color: #fff;
+}
+.btn-danger:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(255,77,106,0.4); }
+.btn-success {
+  background: linear-gradient(135deg, #69ff47, #25a800);
+  color: #000;
+}
+.btn-success:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(105,255,71,0.4); }
+.btn-outline {
+  background: transparent; color: var(--accent2);
+  border: 1px solid var(--accent2);
+}
+.btn-outline:hover { background: rgba(0,229,255,0.08); }
+
+/* === PROGRESS BAR === */
+.progress-wrap { margin-bottom: 8px; }
+.progress-label {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: var(--muted); margin-bottom: 4px;
+}
+.progress-bar { height: 6px; background: var(--surface3); border-radius: 3px; overflow: hidden; }
+.progress-fill {
+  height: 100%; border-radius: 3px;
+  transition: width 1s cubic-bezier(0.4,0,0.2,1);
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+}
+.progress-fill.green { background: linear-gradient(90deg, #69ff47, #00c853); }
+.progress-fill.warn { background: linear-gradient(90deg, #ffb347, #ff6f00); }
+
+/* === SILICON REGEN === */
+.silicon-regen {
+  background: linear-gradient(135deg, rgba(124,77,255,0.1), rgba(0,229,255,0.1));
+  border: 1px solid rgba(124,77,255,0.4);
+  border-radius: 8px; padding: 16px; margin-top: 8px;
+}
+.silicon-title { font-size: 13px; font-weight: 700; color: var(--accent2); margin-bottom: 4px; }
+.silicon-sub { font-size: 11px; color: var(--muted); margin-bottom: 12px; }
+.silicon-crystal-bar { position: relative; height: 24px; background: var(--surface3); border-radius: 4px; overflow: hidden; margin-top: 8px; }
+.silicon-crystal-fill {
+  height: 100%; border-radius: 4px;
+  background: linear-gradient(90deg, #7c4dff, #00e5ff, #69ff47);
+  background-size: 200% 100%; animation: crystal-flow 3s linear infinite;
+  transition: width 3s ease;
+}
+@keyframes crystal-flow { 0%{background-position:0% 50%}100%{background-position:200% 50%} }
+.silicon-pct { position: absolute; inset: 0; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff; }
+.crystal-sparks { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
+.crystal { width: 12px; height: 12px; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); background: var(--faint); transition: background 0.5s; }
+.crystal.lit { background: linear-gradient(135deg, #7c4dff, #00e5ff); animation: crystal-glow 1s ease-in-out infinite alternate; }
+@keyframes crystal-glow { from{filter:brightness(1)}to{filter:brightness(1.5) drop-shadow(0 0 4px #00e5ff)} }
+
+/* === RACCOON === */
+.raccoon-card {
+  background: linear-gradient(135deg, rgba(105,255,71,0.06), rgba(0,229,255,0.06));
+  border: 1px solid rgba(105,255,71,0.2);
+  border-radius: 8px; padding: 16px;
+}
+.raccoon-face { font-size: 36px; text-align: center; margin-bottom: 8px;
+  animation: raccoon-float 3s ease-in-out infinite; }
+@keyframes raccoon-float { 0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)} }
+.raccoon-bar { height: 10px; background: var(--surface3); border-radius: 5px; overflow: hidden; }
+.raccoon-fill { height:100%; background: linear-gradient(90deg, #69ff47, #00e5ff); border-radius:5px; transition: width 1s; }
+.raccoon-label { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-top:4px; }
+
+/* === LOG === */
+.log-box {
+  background: #060610; border: 1px solid var(--border); border-radius: 6px;
+  padding: 12px; font-family: var(--mono); font-size: 11px; color: #aaa;
+  height: 200px; overflow-y: auto; line-height: 1.6;
+  scrollbar-width: thin; scrollbar-color: var(--faint) transparent;
+}
+.log-entry { margin-bottom: 2px; }
+.log-time { color: var(--faint); }
+.log-info { color: var(--accent2); }
+.log-ok { color: var(--accent3); }
+.log-warn { color: var(--warn); }
+.log-err { color: var(--danger); }
+.log-special { color: var(--accent); }
+
+/* === PING CHART === */
+.ping-chart { height: 60px; display: flex; align-items: flex-end; gap: 2px; }
+.ping-bar-item {
+  flex: 1; border-radius: 2px 2px 0 0;
+  background: linear-gradient(0deg, var(--accent), var(--accent2));
+  transition: height 0.5s ease;
+  min-height: 2px;
+}
+
+/* === STAT ROW === */
+.stat-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+.stat-row:last-child { border-bottom:none; }
+.stat-label { font-size:12px; color:var(--muted); }
+.stat-value { font-size:13px; font-weight:700; color:var(--text); font-family:var(--mono); }
+.stat-value.green { color:var(--accent3); }
+.stat-value.cyan { color:var(--accent2); }
+.stat-value.purple { color:var(--accent); }
+.stat-value.warn { color:var(--warn); }
+
+/* === NOTIFICATION === */
+.notif {
+  position: fixed; bottom: 24px; right: 24px; z-index: 999;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 16px;
+  max-width: 280px; font-size: 12px;
+  box-shadow: var(--shadow-lg, 0 12px 32px rgba(0,0,0,0.4));
+  transform: translateY(80px); opacity: 0; transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.notif.show { transform: translateY(0); opacity: 1; }
+.notif-title { font-weight: 700; margin-bottom: 4px; color: var(--accent2); }
+.notif-text { color: var(--muted); }
+
+/* === AI SCAN ANIM === */
+.scan-line {
+  position: absolute; left:0; right:0; height:2px;
+  background: linear-gradient(90deg, transparent, var(--accent2), transparent);
+  animation: scan 2s linear infinite;
+}
+@keyframes scan { 0%{top:0;opacity:1}90%{opacity:1}100%{top:100%;opacity:0} }
+.scan-wrap { position:relative; overflow:hidden; height:4px; margin-bottom:8px; }
+
+/* === STARTUP === */
+.startup-item {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.startup-item:last-child { border-bottom:none; }
+.startup-name { font-size:12px; }
+.startup-delay { font-size:11px; color:var(--muted); font-family:var(--mono); }
+.startup-impact { font-size:10px; padding:2px 6px; border-radius:3px; font-weight:700; }
+.impact-high { background:rgba(255,77,106,0.2); color:var(--danger); }
+.impact-med { background:rgba(255,179,71,0.2); color:var(--warn); }
+.impact-low { background:rgba(105,255,71,0.2); color:var(--accent3); }
+
+/* === WEEKLY MAINTENANCE === */
+.maintenance-card {
+  background: linear-gradient(135deg, rgba(255,77,106,0.08), rgba(255,179,71,0.08));
+  border: 1px solid rgba(255,77,106,0.3);
+  border-radius: 8px; padding: 16px;
+}
+.maintenance-title { font-size:14px; font-weight:700; color:var(--danger); margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+
+/* === UPDATE BADGE === */
+.update-badge {
+  position:absolute; top:-4px; right:-4px;
+  width:12px; height:12px; background:var(--danger); border-radius:50%;
+  animation: pulse-dot 1s infinite;
+}
+
+/* === SCROLLBAR === */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 3px; }
+
+/* === FOOTER === */
+.app-footer {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:8px 20px; background:var(--surface2);
+  border-top:1px solid var(--border); font-size:11px; color:var(--faint);
+  flex-shrink:0;
+}
+.footer-status { display:flex; align-items:center; gap:6px; }
+
+/* === SHINE ANIM === */
+@keyframes shine { 0%{left:-100%}100%{left:200%} }
+.btn-primary-shine {
+  position:relative; overflow:hidden;
+}
+.btn-primary-shine::after {
+  content:''; position:absolute; top:0; left:-100%;
+  width:60%; height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);
+  animation:shine 2.5s infinite;
+}
+
+.badge {
+  display:inline-block; padding:1px 6px; border-radius:3px;
+  font-size:10px; font-weight:700; vertical-align:middle;
+}
+.badge-ai { background:rgba(0,229,255,0.15); color:var(--accent2); border:1px solid rgba(0,229,255,0.3); }
+.badge-new { background:rgba(105,255,71,0.15); color:var(--accent3); border:1px solid rgba(105,255,71,0.3); }
+
+/* Tooltip */
+[data-tip] { position:relative; cursor:help; }
+[data-tip]::after {
+  content:attr(data-tip); position:absolute; bottom:120%; left:50%; transform:translateX(-50%);
+  background:#1a1a2e; border:1px solid var(--border); color:var(--text);
+  font-size:11px; padding:6px 10px; border-radius:6px; white-space:nowrap;
+  opacity:0; pointer-events:none; transition:opacity 0.2s; z-index:99;
+}
+[data-tip]:hover::after { opacity:1; }
+</style>
+</head>
+<body>
+<div class="bg-stars"></div>
+<div class="bg-grid"></div>
+
+<!-- ===== LOGIN ===== -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <svg viewBox="0 0 64 64" fill="none">
+        <circle cx="32" cy="32" r="30" fill="url(#lg1)" opacity="0.15"/>
+        <circle cx="32" cy="32" r="30" stroke="url(#lg1)" stroke-width="1.5"/>
+        <polygon points="32,10 50,20 50,44 32,54 14,44 14,20" fill="none" stroke="url(#lg2)" stroke-width="1.5" opacity="0.7"/>
+        <circle cx="32" cy="32" r="10" fill="url(#lg1)" opacity="0.3"/>
+        <circle cx="32" cy="32" r="10" stroke="url(#lg2)" stroke-width="1.5"/>
+        <line x1="32" y1="10" x2="32" y2="22" stroke="#7c4dff" stroke-width="1.5"/>
+        <line x1="50" y1="20" x2="40" y2="27" stroke="#7c4dff" stroke-width="1.5"/>
+        <line x1="50" y1="44" x2="40" y2="37" stroke="#00e5ff" stroke-width="1.5"/>
+        <line x1="32" y1="54" x2="32" y2="42" stroke="#00e5ff" stroke-width="1.5"/>
+        <line x1="14" y1="44" x2="24" y2="37" stroke="#69ff47" stroke-width="1.5"/>
+        <line x1="14" y1="20" x2="24" y2="27" stroke="#69ff47" stroke-width="1.5"/>
+        <defs>
+          <linearGradient id="lg1" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#7c4dff"/>
+            <stop offset="100%" stop-color="#00e5ff"/>
+          </linearGradient>
+          <linearGradient id="lg2" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#00e5ff"/>
+            <stop offset="100%" stop-color="#69ff47"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <div class="login-title">TurboSystem Center</div>
+    <div class="login-sub">XOS v26.04 • Alrendszer-vezérlő • Hozzáférési kód szükséges</div>
+    <div class="login-label">Hozzáférési kód:</div>
+    <input type="password" class="login-input" id="pin-input" maxlength="4" placeholder="••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <div class="login-err" id="login-err">Hibás kód. Próbáld újra.</div>
+    <button class="btn login-btn btn-primary-shine" onclick="doLogin()">🔐 Belépés</button>
+    <div class="login-hint">Gyerekzár aktív — a kód nem változtatható meg.<br>Csak ebben a dokumentumban van benne. 🤫 Ez a weboldal Neonity 2026 áprilisi videójából készült. Ez az oldal csak viccből készült, egy teljesen más designt kapott.</div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="app">
+  <!-- Titlebar -->
+  <div class="titlebar">
+    <div class="titlebar-left">
+      <svg class="titlebar-icon" viewBox="0 0 18 18" fill="none">
+        <polygon points="9,2 16,6 16,12 9,16 2,12 2,6" fill="none" stroke="#7c4dff" stroke-width="1.5"/>
+        <circle cx="9" cy="9" r="3" fill="#00e5ff"/>
+      </svg>
+      <span class="titlebar-title">TurboSystem Center — XOS Alrendszer</span>
+    </div>
+    <div class="titlebar-controls">
+      <button class="titlebar-btn tb-min">─</button>
+      <button class="titlebar-btn tb-max">□</button>
+      <button class="titlebar-btn tb-close" onclick="document.getElementById('login-screen').style.display='flex';document.getElementById('app').style.display='none'">✕</button>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="app-header">
+    <div class="app-brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 36 36" fill="none">
+          <polygon points="18,3 33,11 33,25 18,33 3,25 3,11" fill="none" stroke="url(#hl)" stroke-width="1.5"/>
+          <circle cx="18" cy="18" r="6" fill="url(#hl)" opacity="0.3"/>
+          <circle cx="18" cy="18" r="6" stroke="url(#hl2)" stroke-width="1.5"/>
+          <defs>
+            <linearGradient id="hl" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#7c4dff"/><stop offset="1" stop-color="#00e5ff"/>
+            </linearGradient>
+            <linearGradient id="hl2" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#00e5ff"/><stop offset="1" stop-color="#69ff47"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">TurboSystem<span style="color:var(--accent2)"> XOS</span></div>
+        <div class="brand-ver">Future Engine v26.04 — AI-vezérelt • Szilícium-regenerátor aktív</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="header-status">
+        <div class="status-dot"></div>
+        <span>Rendszer védett 🦝</span>
+      </div>
+      <button class="btn btn-outline" style="position:relative;font-size:11px" onclick="checkUpdate()">
+        🔄 Frissítések
+        <div class="update-badge"></div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('overview',this)">📊 Áttekintés</button>
+    <button class="tab" onclick="switchTab('perf',this)">⚡ Teljesítmény</button>
+    <button class="tab" onclick="switchTab('memory',this)">💾 Memória</button>
+    <button class="tab" onclick="switchTab('network',this)">🌐 Hálózat</button>
+    <button class="tab" onclick="switchTab('startup',this)">🚀 Indítás</button>
+    <button class="tab" onclick="switchTab('diag',this)">🔬 Diagnosztika</button>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- ===== OVERVIEW ===== -->
+    <div class="tab-panel active" id="tab-overview">
+      <div class="grid-3" style="margin-bottom:12px">
+        <div class="card" style="text-align:center">
+          <div class="card-title" style="justify-content:center"><span class="dot"></span>CPU állapot</div>
+          <div class="gauge gauge-cpu" id="gauge-cpu">
+            <svg viewBox="0 0 90 90"><circle class="gauge-track" cx="45" cy="45" r="36"/><circle class="gauge-fill" id="cpu-arc" cx="45" cy="45" r="36" stroke-dasharray="226" stroke-dashoffset="56"/></svg>
+            <div class="gauge-label"><div class="gauge-value" id="cpu-val" style="color:var(--accent)">75</div><div class="gauge-unit">%</div></div>
+          </div>
+          <div class="gauge-name">Processzor</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px" data-tip="A feladatkezelő rosszul számol. Ez az igazi érték.">⚠️ Feladatkezelő: 23% <span style="color:var(--faint)">(helytelen)</span></div>
+        </div>
+        <div class="card" style="text-align:center">
+          <div class="card-title" style="justify-content:center"><span class="dot" style="background:var(--accent2)"></span>RAM állapot</div>
+          <div class="gauge gauge-ram" id="gauge-ram">
+            <svg viewBox="0 0 90 90"><circle class="gauge-track" cx="45" cy="45" r="36"/><circle class="gauge-fill" id="ram-arc" cx="45" cy="45" r="36" stroke-dasharray="226" stroke-dashoffset="90"/></svg>
+            <div class="gauge-label"><div class="gauge-value" id="ram-val" style="color:var(--accent2)">60</div><div class="gauge-unit">%</div></div>
+          </div>
+          <div class="gauge-name">Memória</div>
+          <div style="font-size:10px;color:var(--accent3);margin-top:4px">16 GB → <b>64 GB</b> (virtuális)</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="dot" style="background:var(--accent3)"></span>Mosómedve elégedettség</div>
+          <div class="raccoon-card">
+            <div class="raccoon-face" id="raccoon-face">🦝</div>
+            <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:8px" id="raccoon-status">A mosómedve elégedett a rendszerrel</div>
+            <div class="raccoon-bar"><div class="raccoon-fill" id="raccoon-bar" style="width:88%"></div></div>
+            <div class="raccoon-label"><span>Szomorú 😢</span><span id="raccoon-pct">88%</span><span>Boldog 😊</span></div>
+          </div>
+          <div style="font-size:10px;color:var(--faint);margin-top:8px;text-align:center">Ha ez a csúszka lemegy, a gép lelassul</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>AI Optimalizáló <span class="badge badge-ai" style="margin-left:4px">AI</span></div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px">A beépített mesterséges intelligencia automatikusan megtalálja és optimalizálja a rendszer gyenge pontjait. Mivel AI-alapú, nem lehet rossz.</div>
+        <div class="scan-wrap" id="scan-wrap" style="display:none"><div class="scan-line"></div></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-primary btn-primary-shine" onclick="runAI()">🤖 AI Optimalizálás indítása</button>
+          <span style="font-size:11px;color:var(--muted)" id="ai-status">Utolsó futtatás: ma 08:24</span>
+        </div>
+        <div style="margin-top:12px" id="ai-suggestions">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:700">AI javaslatok:</div>
+          <div style="font-size:11px;color:var(--muted);display:flex;flex-direction:column;gap:6px" id="sugg-list">
+            <div>💡 Kapcsold be a <b style="color:var(--text)">Silícium Regenerációt</b> — a CPU már 0.3 Hz-et veszített</div>
+            <div>💡 A <b style="color:var(--text)">Direct Fusion réteg</b> csökkenti a render pipeline torlódást</div>
+            <div>💡 Érdemes bekapcsolni az <b style="color:var(--text)">AI FPS Stabilizátort</b> — mert az AI-ban benne van</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title"><span class="dot"></span>Rendszer info</div>
+          <div class="stat-row"><span class="stat-label">OS</span><span class="stat-value purple">TurboSystem XOS v26.04</span></div>
+          <div class="stat-row"><span class="stat-label">Alap Windows</span><span class="stat-value">Windows 7 (legjobb stabil)</span></div>
+          <div class="stat-row"><span class="stat-label">Tálca magasság</span><span class="stat-value green">2 sor (arany középút)</span></div>
+          <div class="stat-row"><span class="stat-label">Fájlkezelő</span><span class="stat-value cyan">Total Commander ✅</span></div>
+          <div class="stat-row"><span class="stat-label">Védőszent</span><span class="stat-value">🦝 Mosómedve</span></div>
+          <div class="stat-row"><span class="stat-label">Betűtípus</span><span class="stat-value">Comic Sans MS 🎨</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="dot" style="background:var(--accent3)"></span>Valós FPS előnézel</div>
+          <div style="margin-bottom:8px">
+            <div class="progress-wrap">
+              <div class="progress-label"><span>Minecraft (Vanilla)</span><span id="fps1">247 FPS</span></div>
+              <div class="progress-bar"><div class="progress-fill green" id="fps1-bar" style="width:82%"></div></div>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-label"><span>Fortnite</span><span id="fps2">389 FPS</span></div>
+              <div class="progress-bar"><div class="progress-fill" id="fps2-bar" style="width:65%"></div></div>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-label"><span>Total Commander megnyitás</span><span id="fps3">0.003 s ⚡</span></div>
+              <div class="progress-bar"><div class="progress-fill green" id="fps3-bar" style="width:99%"></div></div>
+            </div>
+          </div>
+          <div style="font-size:10px;color:var(--faint)">A benchmarkok nem mérvadók. Ami számít: milyen gyorsan nyílik meg a Total Commander.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PERFORMANCE ===== -->
+    <div class="tab-panel" id="tab-perf">
+      <div class="card" style="margin-bottom:12px">
+        <div class="card-title"><span class="dot"></span>Teljesítmény beállítások <span class="badge badge-new" style="margin-left:4px">Titkos</span></div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">⚠️ Érzékeny beállítások — csak te látod, ha ráviszel az egérrel. Ha valaki idejön a gépedhez, ne férhessen hozzá illetéktelen személy!</div>
+        <div class="perf-secret card" style="margin-top:8px">
+          <div class="perf-secret-hint">👆 Vidd rá az egered a beállítások megjelenítéséhez</div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-name">⚡ Turbó mód <span class="badge badge-ai">aktív</span></div>
+              <div class="toggle-desc">Háttérfolyamatok korlátozása, rendszer gyorsítása. Alapból bekapcsolt.</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-name">🔥 Extrém teljesítmény profil</div>
+              <div class="toggle-desc">Overclock — maximális teljesítmény minden körülmények között.</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-name">🎮 Játékprioritás növelése</div>
+              <div class="toggle-desc">Nyilván egyértelmű, hogy mit csinál.</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-name">🤖 AI FPS Stabilizátor <span class="badge badge-ai">AI</span></div>
+              <div class="toggle-desc">Már az AI van a nevében, tehát rossz nem lehet. Kapcsold be.</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Silicon regen -->
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>💎 Szilícium Regeneráció <span class="badge badge-new" style="margin-left:4px">Legjobb funkció</span></div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Folyamatosan fejleszti a CPU szilícium kristályait, így a processzor folyamatosan <b style="color:var(--accent3)">erősebb lesz</b> — és nem gyengébb. Ez rengeteg munka volt.</div>
+        <div class="toggle-row" style="padding-top:0">
+          <div class="toggle-info">
+            <div class="toggle-name">Szilícium regeneráció</div>
+            <div class="toggle-desc" id="sil-desc">A kristályok aktívan fejlődnek</div>
+          </div>
+          <label class="toggle-switch"><input type="checkbox" checked id="sil-toggle" onchange="toggleSilicon(this)"><span class="toggle-track"></span></label>
+        </div>
+        <div class="silicon-regen" id="sil-panel">
+          <div class="silicon-title">🔬 Kristályfejlesztési folyamat</div>
+          <div class="silicon-sub">A CPU szilícium kristálya folyamatosan regenerálódik. Minél tovább fut, annál erősebb lesz a processzored.</div>
+          <div class="progress-wrap">
+            <div class="progress-label"><span>Kristályfejlesztés</span><span id="sil-pct-txt">67%</span></div>
+          </div>
+          <div class="silicon-crystal-bar">
+            <div class="silicon-crystal-fill" id="sil-bar" style="width:67%"></div>
+            <div class="silicon-pct" id="sil-pct">+12 MHz regenerálva</div>
+          </div>
+          <div class="crystal-sparks" id="crystal-sparks"></div>
+          <div style="margin-top:8px;font-size:11px;color:var(--muted)">Becsült teljes regeneráció: <b style="color:var(--accent2)" id="sil-eta">~47 nap múlva</b></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MEMORY ===== -->
+    <div class="tab-panel" id="tab-memory">
+      <div class="grid-2" style="margin-bottom:12px">
+        <div class="card">
+          <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>RAM Optimalizálás</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Felesleges lokokat töröl, optimalizálja a cache-t. 16 GB úgy fut, mint <b style="color:var(--accent3)">64 GB</b>.</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <button class="btn btn-success" onclick="ramOptimize()">🧹 RAM Optimalizálás</button>
+            <span style="font-size:11px;color:var(--muted)" id="ram-opt-status">Kész — 4.2 GB felszabadítva</span>
+          </div>
+          <div style="margin-top:12px">
+            <div class="stat-row"><span class="stat-label">Fizikai RAM</span><span class="stat-value">16 GB</span></div>
+            <div class="stat-row"><span class="stat-label">Virtuális (TurboSystem)</span><span class="stat-value green">64 GB ✨</span></div>
+            <div class="stat-row"><span class="stat-label">Cache hatékonyság</span><span class="stat-value cyan">312%</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="dot"></span>Memória védelem</div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-name">🛡️ Auto memória mentesítés</div>
+              <div class="toggle-desc">A memóriát automatikusan mentesíti terheltség esetén.</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-name">⚡ RAM turbo allokáció</div>
+              <div class="toggle-desc">Gyorsabb memória foglalás minden programhoz.</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-name">🔮 Virtuális 64 GB mód</div>
+              <div class="toggle-desc">16 GB-ból 64 GB-ot varázsol. Komoly, nem?</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--accent3)"></span>Renderelés & FPS boost</div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-name">🔗 Direct Fusion réteg</div>
+            <div class="toggle-desc">Az API és a rendszer között hatékonyabban kezeli a renderelési kéréseket. Csökkenti a render pipeline torlódást — több FPS!</div>
+          </div>
+          <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-name">🚀 Hyper Render</div>
+            <div class="toggle-desc">Ugyanazt csinálja, mint a Direct Fusion, de van rá külön gomb, mert így jobban néz ki.</div>
+          </div>
+          <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"></span></label>
+        </div>
+        <div class="toggle-row" style="border-bottom:none">
+          <div class="toggle-info">
+            <div class="toggle-name">🎞️ AI Frame Gen <span class="badge badge-ai">AI</span> <span class="badge badge-new">64×</span></div>
+            <div class="toggle-desc">64-szeres frame generálás. Az Nvidia csak hatszoros-nál tart — eléggé béna. Sokkal több FPS, jobb játékélmény.</div>
+          </div>
+          <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"></span></label>
+        </div>
+        <div style="margin-top:12px;padding:10px;background:rgba(0,229,255,0.05);border-radius:6px;font-size:11px;color:var(--muted)">
+          🎯 Becsült FPS növekedés az AI Frame Gen aktiválása után: <b style="color:var(--accent3)">+6400%</b> (64× szorzó)
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== NETWORK ===== -->
+    <div class="tab-panel" id="tab-network">
+      <div class="grid-2" style="margin-bottom:12px">
+        <div class="card">
+          <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>Ping előrejelzés <span class="badge badge-ai" style="margin-left:4px">AI</span></div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Előre megjósolja a jövőbeli késleltetést és előre elküldi a csomagokat — a ping <b style="color:var(--accent3)">közel nullára csökken</b>.</div>
+          <div style="margin-bottom:8px">
+            <div class="stat-row"><span class="stat-label">Jelenlegi ping</span><span class="stat-value green" id="ping-now">2 ms</span></div>
+            <div class="stat-row"><span class="stat-label">Előrejelzett ping (5 mp múlva)</span><span class="stat-value cyan" id="ping-pred">1 ms</span></div>
+            <div class="stat-row"><span class="stat-label">Előre elküldött csomagok</span><span class="stat-value purple" id="ping-pre">1,247</span></div>
+          </div>
+          <div style="margin-bottom:8px">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Ping előzmények:</div>
+            <div class="ping-chart" id="ping-chart"></div>
+          </div>
+          <button class="btn btn-primary" onclick="optimizeNet()" style="width:100%">🌐 Hálózat optimalizálása</button>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="dot" style="background:var(--danger)"></span>Önvédelem & biztonság</div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-name">🛡️ Önvédelem mód</div>
+              <div class="toggle-desc">Vírusirtók (főleg Windows Defender — eléggé hulladék) nem tudják törölni a TurboSystem alrendszert.</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-name">🤖 AI boot sorrendező <span class="badge badge-ai">AI</span></div>
+              <div class="toggle-desc">A programok abban a sorrendben indulnak, ami a leggyorsabb és legjobb a rendszernek.</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"></span></label>
+          </div>
+          <div class="toggle-row" style="border-bottom:none">
+            <div class="toggle-info">
+              <div class="toggle-name">🔒 Windows Defender letiltás</div>
+              <div class="toggle-desc">A Defender sohasem működött jól. Ez kikapcsolja. Megbízhatatlan program.</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot"></span>Hálózati statisztikák</div>
+        <div class="grid-3">
+          <div style="text-align:center">
+            <div style="font-size:28px;font-weight:700;color:var(--accent3);font-family:var(--mono)" id="net-down">847</div>
+            <div style="font-size:11px;color:var(--muted)">Mbps letöltés</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:28px;font-weight:700;color:var(--accent2);font-family:var(--mono)" id="net-up">412</div>
+            <div style="font-size:11px;color:var(--muted)">Mbps feltöltés</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:28px;font-weight:700;color:var(--accent);font-family:var(--mono)" id="net-lat">0</div>
+            <div style="font-size:11px;color:var(--muted)">ms jitter</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== STARTUP ===== -->
+    <div class="tab-panel" id="tab-startup">
+      <div class="grid-2" style="margin-bottom:12px">
+        <div class="card">
+          <div class="card-title"><span class="dot"></span>Boot optimalizálás</div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-name">⚡ Gyors indítás turbo</div>
+              <div class="toggle-desc">Bekapcsolva sokkal gyorsabban indul a gép. Az első opció = legjobb opció.</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"></span></label>
+          </div>
+          <div class="toggle-row" style="border-bottom:none">
+            <div class="toggle-info">
+              <div class="toggle-name">🔮 Pre-load előtöltés</div>
+              <div class="toggle-desc">A leggyakrabban használt programokat előre betölti a memóriába.</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox"><span class="toggle-track"></span></label>
+          </div>
+          <div style="margin-top:12px">
+            <div class="stat-row"><span class="stat-label">Előző indítási idő</span><span class="stat-value cyan">3.2 s</span></div>
+            <div class="stat-row"><span class="stat-label">TurboSystem nélkül</span><span class="stat-value warn">47 s</span></div>
+            <div class="stat-row"><span class="stat-label">Megtakarítás</span><span class="stat-value green">+1369%</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>Indítási programok</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Az AI optimalizálja az indítási sorrendet.</div>
+          <div id="startup-list">
+            <div class="startup-item">
+              <span class="startup-name">TurboSystem Center</span>
+              <div style="display:flex;gap:8px;align-items:center">
+                <span class="startup-delay">0 ms</span>
+                <span class="startup-impact impact-low">alacsony</span>
+              </div>
+            </div>
+            <div class="startup-item">
+              <span class="startup-name">Total Commander</span>
+              <div style="display:flex;gap:8px;align-items:center">
+                <span class="startup-delay">12 ms</span>
+                <span class="startup-impact impact-low">alacsony</span>
+              </div>
+            </div>
+            <div class="startup-item">
+              <span class="startup-name">Windows Explorer</span>
+              <div style="display:flex;gap:8px;align-items:center">
+                <span class="startup-delay">340 ms</span>
+                <span class="startup-impact impact-high">magas</span>
+              </div>
+            </div>
+            <div class="startup-item">
+              <span class="startup-name">Windows Defender</span>
+              <div style="display:flex;gap:8px;align-items:center">
+                <span class="startup-delay">1200 ms</span>
+                <span class="startup-impact impact-high">magas 🗑️</span>
+              </div>
+            </div>
+            <div class="startup-item" style="border-bottom:none">
+              <span class="startup-name">Discord</span>
+              <div style="display:flex;gap:8px;align-items:center">
+                <span class="startup-delay">890 ms</span>
+                <span class="startup-impact impact-med">közepes</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== DIAGNOSTICS ===== -->
+    <div class="tab-panel" id="tab-diag">
+      <div class="card" style="margin-bottom:12px">
+        <div class="card-title"><span class="dot"></span>Rendszer napló</div>
+        <div class="log-box" id="log-box">
+          <div class="log-entry"><span class="log-time">[08:24:01] </span><span class="log-ok">✅ TurboSystem Center elindítva — v26.04</span></div>
+          <div class="log-entry"><span class="log-time">[08:24:01] </span><span class="log-info">ℹ️ Szilícium regeneráció aktiválva — kristályok fejlődnek</span></div>
+          <div class="log-entry"><span class="log-time">[08:24:02] </span><span class="log-ok">✅ AI FPS Stabilizátor betöltve (AI van a nevében)</span></div>
+          <div class="log-entry"><span class="log-time">[08:24:02] </span><span class="log-ok">✅ Turbó mód: AKTÍV — rendszer gyorsítva</span></div>
+          <div class="log-entry"><span class="log-time">[08:24:03] </span><span class="log-warn">⚠️ Windows Defender megpróbálta törölni a rendszert — blokkolva</span></div>
+          <div class="log-entry"><span class="log-time">[08:24:03] </span><span class="log-ok">✅ Önvédelem aktív — Defender neutralizálva</span></div>
+          <div class="log-entry"><span class="log-time">[08:24:05] </span><span class="log-info">ℹ️ RAM optimalizálás: 16 GB → 64 GB virtualizálva</span></div>
+          <div class="log-entry"><span class="log-time">[08:24:06] </span><span class="log-ok">✅ Direct Fusion réteg aktív — pipeline torlódás: 0%</span></div>
+          <div class="log-entry"><span class="log-time">[08:24:07] </span><span class="log-info">ℹ️ AI Frame Gen engedélyezve — 64× szorzó aktív</span></div>
+          <div class="log-entry"><span class="log-time">[08:24:09] </span><span class="log-ok">✅ Mosómedve elégedett — rendszer védett 🦝</span></div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>Rendszer átfogó vizsgálat</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Mindent átfésül a rendszeren — hibát talál, javítja.</div>
+          <button class="btn btn-primary btn-primary-shine" onclick="runDiag()" style="width:100%;margin-bottom:12px">🔍 Diagnosztika indítása</button>
+          <div id="diag-progress" style="display:none">
+            <div class="progress-wrap">
+              <div class="progress-label"><span id="diag-label">Ellenőrzés...</span><span id="diag-pct-txt">0%</span></div>
+              <div class="progress-bar"><div class="progress-fill" id="diag-bar" style="width:0%"></div></div>
+            </div>
+          </div>
+          <div id="diag-result" style="font-size:11px;color:var(--accent3);display:none">✅ Minden rendben — 0 hiba találva</div>
+        </div>
+        <div class="card maintenance-card">
+          <div class="maintenance-title">🔴 Heti karbantartás <span class="badge badge-new">Legjobb funkció</span></div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:12px">
+            Hetente egyszer, <b style="color:var(--warn)">vasárnap hajnali 3-kor</b> személyesen bejelentkezem a gépedre — nyilván tudtodon kívül — és mindent átállítok úgy, ahogy nekem tetszik.<br><br>
+            Tudom, mert én nem tévedek.
+          </div>
+          <button class="btn btn-danger btn-primary-shine" onclick="activateMaintenance()" style="width:100%">🔴 Heti karbantartás aktiválása</button>
+          <div style="font-size:10px;color:var(--faint);margin-top:8px;text-align:center" id="maint-status">Következő látogatás: vasárnap 03:00</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- Footer -->
+  <div class="app-footer">
+    <div class="footer-status">
+      <div class="status-dot" style="width:6px;height:6px;background:var(--accent3)"></div>
+      <span>TurboSystem XOS v26.04 • Minden funkció aktív</span>
+    </div>
+    <span>🦝 Mosómedve: <b style="color:var(--accent3)">elégedett</b> • Silícium: <b style="color:var(--accent2)">regenerálódik</b></span>
+  </div>
+</div><!-- /app -->
+
+<!-- Notification -->
+<div class="notif" id="notif">
+  <div class="notif-title" id="notif-title">Értesítés</div>
+  <div class="notif-text" id="notif-text"></div>
+</div>
+
+<script>
+// ===== LOGIN =====
+function doLogin(){
+  const pin = document.getElementById('pin-input').value;
+  const err = document.getElementById('login-err');
+  if(pin === '6767'){
+    document.getElementById('login-screen').style.display='none';
+    const app = document.getElementById('app');
+    app.style.display='flex';
+    initApp();
+  } else {
+    err.style.opacity='1';
+    setTimeout(()=>err.style.opacity='0',2000);
+    document.getElementById('pin-input').value='';
+  }
+}
+document.getElementById('pin-input').addEventListener('keydown',e=>e.key==='Enter'&&doLogin());
+
+// ===== TABS =====
+function switchTab(name, el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+// ===== GAUGE UPDATE =====
+function setGauge(arcId, valId, pct, color){
+  const circumference = 226;
+  const offset = circumference - (circumference * pct / 100);
+  document.getElementById(arcId).style.strokeDashoffset = offset;
+  document.getElementById(valId).textContent = Math.round(pct);
+}
+
+// ===== SILICON CRYSTALS =====
+let silPct = 67;
+let silMhz = 12;
+function initCrystals(){
+  const wrap = document.getElementById('crystal-sparks');
+  wrap.innerHTML='';
+  for(let i=0;i<30;i++){
+    const d = document.createElement('div');
+    d.className='crystal'+(i<Math.floor(silPct/3.4)?' lit':'');
+    wrap.appendChild(d);
+  }
+}
+function updateSilicon(){
+  silPct = Math.min(100, silPct + 0.05);
+  silMhz = Math.min(9999, silMhz + 0.02);
+  document.getElementById('sil-bar').style.width = silPct+'%';
+  document.getElementById('sil-pct').textContent = '+'+silMhz.toFixed(1)+' MHz regenerálva';
+  document.getElementById('sil-pct-txt').textContent = silPct.toFixed(1)+'%';
+  const days = Math.max(0, Math.round((100-silPct)/0.72));
+  document.getElementById('sil-eta').textContent = days > 0 ? '~'+days+' nap múlva' : '✅ Teljes regeneráció!';
+  initCrystals();
+}
+function toggleSilicon(cb){
+  const panel = document.getElementById('sil-panel');
+  const desc = document.getElementById('sil-desc');
+  if(cb.checked){
+    panel.style.display='block';
+    desc.textContent='A kristályok aktívan fejlődnek';
+    showNotif('Szilícium Regeneráció','A CPU kristályai ismét fejlődnek! 💎');
+  } else {
+    panel.style.display='none';
+    desc.textContent='Inaktív — a kristályok nem fejlődnek';
+    showNotif('Figyelem!','A szilícium regeneráció ki van kapcsolva. A CPU gyengülhet! ⚠️');
+  }
+}
+
+// ===== PING CHART =====
+function initPingChart(){
+  const chart = document.getElementById('ping-chart');
+  chart.innerHTML='';
+  for(let i=0;i<20;i++){
+    const bar=document.createElement('div');
+    bar.className='ping-bar-item';
+    const h=Math.random()*40+4;
+    bar.style.height=h+'px';
+    chart.appendChild(bar);
+  }
+}
+function updatePingChart(){
+  const bars=document.querySelectorAll('.ping-bar-item');
+  bars.forEach(b=>b.style.height=(Math.random()*40+4)+'px');
+}
+
+// ===== AI OPTIMIZE =====
+function runAI(){
+  const wrap = document.getElementById('scan-wrap');
+  const status = document.getElementById('ai-status');
+  wrap.style.display='block';
+  status.textContent='🤖 AI optimalizálás fut...';
+  showNotif('AI Optimalizáló','A mesterséges intelligencia dolgozik a rendszeren... 🤖');
+  setTimeout(()=>{
+    wrap.style.display='none';
+    const now = new Date();
+    status.textContent='Utolsó futtatás: '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    addLog('ok','✅ AI optimalizálás befejezve — rendszer 47%-kal gyorsabb');
+    showNotif('AI kész!','Optimalizálás befejezve! A rendszer 47%-kal gyorsabb lett. 🚀');
+    raccoonHappy();
+  },3000);
+}
+
+// ===== RAM OPTIMIZE =====
+function ramOptimize(){
+  const status = document.getElementById('ram-opt-status');
+  status.textContent='🔄 Optimalizálás...';
+  showNotif('RAM Optimalizálás','Felesleges lokok törlése folyamatban...');
+  setTimeout(()=>{
+    const freed = (Math.random()*4+2).toFixed(1);
+    status.textContent='✅ Kész — '+freed+' GB felszabadítva';
+    addLog('ok','✅ RAM optimalizálva — '+freed+' GB felszabadítva, 16 GB → 64 GB aktív');
+  },2000);
+}
+
+// ===== NET OPTIMIZE =====
+function optimizeNet(){
+  showNotif('Hálózat optimalizálás','Előre küldöm a csomagokat... ping csökkentése folyamatban ⚡');
+  document.getElementById('ping-now').textContent='0 ms';
+  document.getElementById('ping-pred').textContent='0 ms';
+  setTimeout(()=>{
+    addLog('ok','✅ Hálózat optimalizálva — ping: 0ms, előre elküldött csomagok: 9,472');
+    showNotif('Hálózat kész!','Ping sikeresen 0 ms-ra csökkentve! 🌐');
+  },2000);
+}
+
+// ===== DIAGNOSTICS =====
+function runDiag(){
+  const prog = document.getElementById('diag-progress');
+  const bar = document.getElementById('diag-bar');
+  const label = document.getElementById('diag-label');
+  const pctTxt = document.getElementById('diag-pct-txt');
+  const result = document.getElementById('diag-result');
+  prog.style.display='block';
+  result.style.display='none';
+  const steps = ['CPU kristályok ellenőrzése...','RAM integritás vizsgálat...','Mosómedve elégedettség mérés...','Render pipeline audit...','Szilícium hőmérséklet mérés...','Titkos beállítások validálása...','Végső összesítés...'];
+  let i=0;
+  const interval = setInterval(()=>{
+    if(i>=steps.length){ clearInterval(interval); prog.style.display='none'; result.style.display='block'; addLog('ok','✅ Diagnosztika kész — 0 hiba találva (persze)'); return; }
+    label.textContent=steps[i];
+    const pct=Math.round((i+1)/steps.length*100);
+    bar.style.width=pct+'%';
+    pctTxt.textContent=pct+'%';
+    i++;
+  },500);
+}
+
+// ===== MAINTENANCE =====
+function activateMaintenance(){
+  showNotif('🔴 Heti karbantartás aktiválva!','Minden vasárnap 03:00-kor személyesen bejelentkezem a gépedre. Megbízhatsz bennem! 🔴');
+  document.getElementById('maint-status').textContent='✅ AKTÍV — vasárnap 03:00 (várd a belépést)';
+  addLog('special','🔴 Heti karbantartás aktiválva — vasárnap 03:00-kor fogom elérni a géped');
+}
+
+// ===== UPDATE =====
+function checkUpdate(){
+  showNotif('Frissítések','Keresés... Találtunk 1 frissítést: TurboSystem v26.05 — "Mosómedve stabilabb, kristályok gyorsabbak" ✨');
+  addLog('info','ℹ️ Frissítés elérhető: v26.05 — restart szükséges');
+}
+
+// ===== LOG =====
+function addLog(type, msg){
+  const box = document.getElementById('log-box');
+  const now = new Date();
+  const time = '['+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0')+'] ';
+  const entry = document.createElement('div');
+  entry.className='log-entry';
+  entry.innerHTML='<span class="log-time">'+time+'</span><span class="log-'+type+'">'+msg+'</span>';
+  box.appendChild(entry);
+  box.scrollTop=box.scrollHeight;
+}
+
+// ===== RACCOON =====
+function raccoonHappy(){
+  const face=document.getElementById('raccoon-face');
+  const status=document.getElementById('raccoon-status');
+  face.textContent='🦝';
+  face.style.animation='none';
+  setTimeout(()=>face.style.animation='raccoon-float 3s ease-in-out infinite',50);
+  status.textContent='A mosómedve nagyon boldog! 🎉';
+  setTimeout(()=>status.textContent='A mosómedve elégedett a rendszerrel',3000);
+}
+
+// ===== NOTIFICATION =====
+let notifTimer;
+function showNotif(title, text){
+  clearTimeout(notifTimer);
+  const n=document.getElementById('notif');
+  document.getElementById('notif-title').textContent=title;
+  document.getElementById('notif-text').textContent=text;
+  n.classList.add('show');
+  notifTimer=setTimeout(()=>n.classList.remove('show'),4000);
+}
+
+// ===== INIT APP =====
+function initApp(){
+  initCrystals();
+  initPingChart();
+  setGauge('cpu-arc','cpu-val',75,'var(--accent)');
+  setGauge('ram-arc','ram-val',60,'var(--accent2)');
+
+  // Live updates
+  setInterval(()=>{
+    // CPU fluctuation
+    const cpu = 60+Math.random()*30;
+    setGauge('cpu-arc','cpu-val',cpu);
+
+    // RAM fluctuation
+    const ram = 50+Math.random()*25;
+    setGauge('ram-arc','ram-val',ram);
+
+    // Silicon
+    updateSilicon();
+
+    // Raccoon
+    const rPct = 80+Math.random()*18;
+    document.getElementById('raccoon-bar').style.width=rPct+'%';
+    document.getElementById('raccoon-pct').textContent=Math.round(rPct)+'%';
+
+    // Ping
+    updatePingChart();
+    document.getElementById('ping-now').textContent=Math.floor(Math.random()*4+1)+' ms';
+    document.getElementById('ping-pred').textContent=Math.floor(Math.random()*3)+' ms';
+    document.getElementById('ping-pre').textContent=(1000+Math.floor(Math.random()*500)).toLocaleString('hu');
+
+    // Net
+    document.getElementById('net-down').textContent=Math.floor(800+Math.random()*200);
+    document.getElementById('net-up').textContent=Math.floor(380+Math.random()*100);
+    document.getElementById('net-lat').textContent=Math.floor(Math.random()*2);
+
+  }, 1200);
+
+  // Periodic random notifications
+  const notifs = [
+    ['Szilícium regeneráció','A CPU kristályai folyamatosan fejlődnek! +0.1 MHz 💎'],
+    ['Mosómedve figyelmeztet','Egy háttérfolyamat gyanús volt — blokkolva 🦝'],
+    ['Direct Fusion réteg','Render pipeline torlódás 0%-ra csökkentve ✨'],
+    ['AI FPS Stabilizátor','FPS stabilizálva — mert AI van a nevében 🤖'],
+    ['Heti karbantartás emlékeztető','Vasárnap 03:00 — készítsd elő a gépet! 🔴'],
+    ['RAM virtualizáció','16 GB sikeresen 64 GB-ként futtatva 🚀'],
+  ];
+  let notifIdx=0;
+  setInterval(()=>{
+    const n=notifs[notifIdx%notifs.length];
+    showNotif(n[0],n[1]);
+    notifIdx++;
+  }, 18000);
+
+  setTimeout(()=>showNotif('Üdvözlet!','TurboSystem XOS betöltve. A rendszert vasárnap hajnali 3-kor meglátogatja -----. 🦝'),1000);
+}
+</script>
+</body>
+</html>
